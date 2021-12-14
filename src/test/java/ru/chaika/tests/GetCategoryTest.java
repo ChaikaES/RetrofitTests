@@ -6,9 +6,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import retrofit2.Response;
 import ru.chaika.dto.Category;
+import ru.chaika.enums.CategoryType;
 import ru.chaika.service.CategoryService;
 import ru.chaika.utils.RetrofitUtils;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class GetCategoryTest {
@@ -22,7 +24,21 @@ public class GetCategoryTest {
     @SneakyThrows
     @Test
     void getCategoryByIdPositiveTest() {
-        Response<Category> response = categoryService.getCategory(1).execute();
+        Integer id = CategoryType.FOOD.getId();
+
+        Response<Category> response = categoryService.getCategory(id).execute();
         assertThat(response.isSuccessful(), CoreMatchers.is(true));
+        assertThat(response.body().getId(), equalTo(id));
+        assertThat(response.body().getTitle(), equalTo("Food"));
+        response.body().getProducts().forEach(product ->
+                assertThat(product.getCategoryTitle(), equalTo("Food")));
+    }
+
+    @SneakyThrows
+    @Test
+    void getCategoryNotFoundTest() {
+        Response<Category> response = categoryService.getCategory(989).execute();
+        assertThat(response.isSuccessful(), CoreMatchers.is(false));
+        assertThat(response.code(), equalTo(404));
     }
 }
