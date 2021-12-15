@@ -1,7 +1,6 @@
 package ru.chaika.tests;
 
 import com.github.javafaker.Faker;
-import lombok.extern.slf4j.Slf4j;
 import okhttp3.ResponseBody;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeAll;
@@ -11,17 +10,13 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import ru.chaika.dto.Product;
 import ru.chaika.enums.CategoryType;
-import ru.chaika.dto.Category;
 import ru.chaika.service.CategoryService;
 import ru.chaika.service.ProductService;
 import ru.chaika.utils.RetrofitUtils;
-
 import java.io.IOException;
 import java.util.ArrayList;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 
 public class ProductTests {
     static Retrofit client;
@@ -78,6 +73,7 @@ public class ProductTests {
         Response<Product> response1 = productService.createProduct(product).execute();
 
         Response<Product> response2 = productService.getProduct(response1.body().getId()).execute();
+
         assertThat(response2.isSuccessful(), CoreMatchers.is(true));
         assertThat(response2.body().getId(), equalTo(response1.body().getId()));
         assertThat(response2.body().getTitle(), equalTo(product.getTitle()));
@@ -86,7 +82,15 @@ public class ProductTests {
     }
 
     @Test
-    void putUpdateProductTest() throws IOException {
+    void getProductByWrongIdTest() throws IOException {
+        Response<Product> response = productService.getProduct(-1).execute();
+
+        assertThat(response.isSuccessful(), CoreMatchers.is(false));
+        assertThat(response.code(), equalTo(404));
+    }
+
+    @Test
+    void updateProductTest() throws IOException {
         Response<Product> response1 = productService.createProduct(product).execute();
 
         product.setId(response1.body().getId());
@@ -106,14 +110,63 @@ public class ProductTests {
     }
 
     @Test
+    void updateProductWithIncorrectCategoryTest() throws IOException {
+        Response<Product> response1 = productService.createProduct(product).execute();
+
+        product.setId(response1.body().getId());
+        product.setCategoryTitle("Wrong Category");
+
+        Response<ResponseBody> response2 = productService.putProduct(product).execute();
+
+        assertThat(response2.isSuccessful(), CoreMatchers.is(false));
+        assertThat(response2.code(), equalTo(400));
+    }
+
+    @Test
+    void  updateProductParticallyTest() throws IOException {
+        Response<Product> response1 = productService.createProduct(product).execute();
+
+        Product product1 = new Product().withId(response1.body().getId());
+
+        Response<ResponseBody> response2 = productService.putProduct(product1).execute();
+
+        assertThat(response2.isSuccessful(), CoreMatchers.is(false));
+        assertThat(response2.code(), equalTo(400));
+    }
+
+    @Test
     void deleteProductTest() throws IOException {
         Response<Product> response1 = productService.createProduct(product).execute();
 
         Response<ResponseBody> response2 = productService.deleteProduct(response1.body().getId()).execute();
+
         assertThat(response2.isSuccessful(), CoreMatchers.is(true));
 
         Response<Product> response3 = productService.getProduct(response1.body().getId()).execute();
+
         assertThat(response3.isSuccessful(), CoreMatchers.is(false));
         assertThat(response3.code(), equalTo(404));
+    }
+
+    @Test
+    void deleteNonExistingProductTest() throws IOException {
+        Response<Product> response1 = productService.createProduct(product).execute();
+
+        Response<ResponseBody> response2 = productService.deleteProduct(response1.body().getId()).execute();
+
+        assertThat(response2.isSuccessful(), CoreMatchers.is(true));
+
+        Response<ResponseBody> response3 = productService.deleteProduct(response1.body().getId()).execute();
+
+        assertThat(response3.isSuccessful(), CoreMatchers.is(false));
+        assertThat(response3.code(), equalTo(404));
+    }
+
+    @Test
+    void deleteProductWithWrongIdTest() throws IOException {
+        Response<ResponseBody> response = productService.deleteProduct(-1).execute();
+
+        assertThat(response.isSuccessful(), CoreMatchers.is(false));
+        assertThat(response.code(), equalTo(404));
     }
 }

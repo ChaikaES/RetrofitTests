@@ -27,9 +27,11 @@ public class GetCategoryTest {
         Integer id = CategoryType.FOOD.getId();
 
         Response<Category> response = categoryService.getCategory(id).execute();
+
         assertThat(response.isSuccessful(), CoreMatchers.is(true));
         assertThat(response.body().getId(), equalTo(id));
         assertThat(response.body().getTitle(), equalTo("Food"));
+
         response.body().getProducts().forEach(product ->
                 assertThat(product.getCategoryTitle(), equalTo("Food")));
     }
@@ -38,6 +40,7 @@ public class GetCategoryTest {
     @Test
     void getCategoryNotFoundTest() {
         Response<Category> response = categoryService.getCategory(989).execute();
+
         assertThat(response.isSuccessful(), CoreMatchers.is(false));
         assertThat(response.code(), equalTo(404));
     }
