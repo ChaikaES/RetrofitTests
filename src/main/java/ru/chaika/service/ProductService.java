@@ -11,7 +11,7 @@ public interface ProductService {
     Call<ArrayList<Product>> getProducts();
 
     @GET("products/{id}")
-    Call<Product> getProduct(@Path("id") Integer id);
+    Call<Product> getProduct(@Path("id") Long id);
 
     @POST("products")
     Call<Product> createProduct(@Body Product product);
@@ -20,5 +20,5 @@ public interface ProductService {
     Call<ResponseBody> putProduct(@Body Product product);
 
     @DELETE("products/{id}")
-    Call<ResponseBody> deleteProduct(@Path("id") int id);
+    Call<ResponseBody> deleteProduct(@Path("id") Long id);
 }

@@ -8,7 +8,7 @@ import lombok.*;
 @With
 @ToString
 public class Product {
-    Integer id;
+    Long id;
     String title;
     Integer price;
     String categoryTitle;

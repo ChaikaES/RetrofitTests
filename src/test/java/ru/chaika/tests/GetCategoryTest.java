@@ -5,9 +5,12 @@ import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import retrofit2.Response;
+import ru.chaika.db.dao.CategoriesMapper;
+import ru.chaika.db.model.Categories;
 import ru.chaika.dto.Category;
 import ru.chaika.enums.CategoryType;
 import ru.chaika.service.CategoryService;
+import ru.chaika.utils.DbUtils;
 import ru.chaika.utils.RetrofitUtils;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -24,16 +27,16 @@ public class GetCategoryTest {
     @SneakyThrows
     @Test
     void getCategoryByIdPositiveTest() {
-        Integer id = CategoryType.FOOD.getId();
+        Integer newCategoryId = DbUtils.createNewCategory("Auto");
 
-        Response<Category> response = categoryService.getCategory(id).execute();
+        Response<Category> response = categoryService.getCategory(newCategoryId).execute();
 
         assertThat(response.isSuccessful(), CoreMatchers.is(true));
-        assertThat(response.body().getId(), equalTo(id));
-        assertThat(response.body().getTitle(), equalTo("Food"));
+        assertThat(response.body().getId(), equalTo(newCategoryId));
+        assertThat(response.body().getTitle(), equalTo("Auto"));
 
         response.body().getProducts().forEach(product ->
-                assertThat(product.getCategoryTitle(), equalTo("Food")));
+                assertThat(product.getCategoryTitle(), equalTo("Auto")));
     }
 
     @SneakyThrows
